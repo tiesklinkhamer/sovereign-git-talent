@@ -1,5 +1,11 @@
+import os
+import json
 import logging
+import httpx
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Optional
+from anthropic import AsyncAnthropic
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -12,7 +18,9 @@ from app.models import TargetProfile, TargetStatus, TrackedEvent, IntelligenceLo
 from app.github import run_ingestion_pipeline
 from app.intelligence import run_intelligence_pipeline
 from app.discovery import run_discovery_pipeline
+from app.discovery_algorithmic import run_algorithmic_discovery
 from app.auth import create_access_token, get_github_user, get_current_user, TokenData
+from app.models import TargetProfile, TargetStatus, TrackedEvent, IntelligenceLog, DiscoveryKeyword
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -28,6 +36,7 @@ async def scheduled_sync_job():
     async with AsyncSessionLocal() as session:
         try:
             await run_discovery_pipeline(session)
+            await run_algorithmic_discovery(session)
             await run_ingestion_pipeline(session)
             await run_intelligence_pipeline(session)
             logger.info("Scheduled sync job completed successfully.")
@@ -292,6 +301,7 @@ async def trigger_sync(background_tasks: BackgroundTasks):
         async with AsyncSessionLocal() as session:
             try:
                 await run_discovery_pipeline(session)
+                await run_algorithmic_discovery(session)
                 await run_ingestion_pipeline(session)
                 await run_intelligence_pipeline(session)
                 logger.info("Manual sync job completed.")
@@ -300,6 +310,29 @@ async def trigger_sync(background_tasks: BackgroundTasks):
 
     background_tasks.add_task(manual_sync)
     return {"message": "Sync job has been pushed to background tasks."}
+
+@app.post("/discovery/keywords", summary="Add a new discovery keyword")
+async def add_keyword(
+    keyword: str, 
+    category: str = "general",
+    session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Adds a new technical keyword to the algorithmic discovery engine.
+    """
+    db_kw = DiscoveryKeyword(keyword=keyword, category=category)
+    session.add(db_kw)
+    await session.commit()
+    return {"message": "Keyword added successfully"}
+
+@app.get("/discovery/keywords/list", summary="List all active discovery keywords")
+async def list_keywords(session: AsyncSession = Depends(get_async_session)):
+    """
+    Returns the list of active technical keywords used for algorithmic discovery.
+    """
+    res = await session.execute(select(DiscoveryKeyword))
+    keywords = res.scalars().all()
+    return {"keywords": keywords}
 
 @app.get("/search/profiles", summary="Search and filter discovered talent")
 async def search_profiles(

@@ -59,3 +59,11 @@ class IntelligenceLog(SQLModel, table=True):
     analyzed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     event: "TrackedEvent" = Relationship(back_populates="intelligence_logs")
+
+class DiscoveryKeyword(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    keyword: str = Field(unique=True, index=True)
+    category: str = Field(default="general", description="e.g., UAV, Robotics, AI, SDR")
+    is_active: bool = Field(default=True)
+    last_polled_at: Optional[datetime] = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

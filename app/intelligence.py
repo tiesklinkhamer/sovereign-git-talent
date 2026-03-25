@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from datetime import datetime, timezone
 from typing import Dict, Any
 from anthropic import AsyncAnthropic
 from sqlmodel import select
@@ -131,6 +132,30 @@ async def evaluate_user_events(session: AsyncSession, profile: TargetProfile, cl
         logger.error(f"Failed to parse Claude JSON response for {profile.github_username}: {content}")
     except Exception as e:
         logger.error(f"Failed to evaluate events for {profile.github_username}: {e}")
+
+async def evaluate_discovery_snippet(client: AsyncAnthropic, snippet: str, keyword: str) -> bool:
+    """
+    Fast L1 filter to determine if a search result is relevant to defense tech.
+    """
+    prompt = f"""Evaluate if the following GitHub code/repo snippet is related to actual hardware, software, or research 
+useful in defense or dual-use sectors (drones, robotics, AI, crypto, aerospace, security).
+
+Keyword hit: {keyword}
+Snippet: {snippet}
+
+Return ONLY 'YES' or 'NO'."""
+
+    try:
+        response = await client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=10,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0
+        )
+        return "YES" in response.content[0].text.upper()
+    except Exception as e:
+        logger.error(f"Discovery filter error: {e}")
+        return True # Default to True to avoid missing talent on API error
 
 async def synthesize_talent_brief(session: AsyncSession, profile: TargetProfile, client: AsyncAnthropic):
     """

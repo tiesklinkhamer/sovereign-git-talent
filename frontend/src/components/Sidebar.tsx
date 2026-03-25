@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Activity, ShieldAlert, User, LogOut, Terminal, Target } from "lucide-react";
+import { Search, Activity, ShieldAlert, User, LogOut, Terminal, Target, Filter } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
@@ -26,6 +26,10 @@ export default function Sidebar() {
         <Link href="/matchmaking" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
           <Target className="w-5 h-5" />
           Matchmaking
+        </Link>
+        <Link href="/discovery/settings" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+          <Filter className="w-5 h-5" />
+          Discovery Nets
         </Link>
         {user && (
           <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
