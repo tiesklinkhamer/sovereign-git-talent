@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+dist/
+.vercel
+*.log
+
+# OS
+.DS_Store
+*.swp
+
+# Application
+app.db
+intelligence.log
+*.db
