@@ -22,7 +22,7 @@ export default function CallbackPage() {
 
   const handleCallback = async (code: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/auth/github/callback?code=${code}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/github/callback?code=${code}`);
       if (res.ok) {
         const data = await res.json();
         setAuth(data.access_token);

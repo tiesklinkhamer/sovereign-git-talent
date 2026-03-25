@@ -22,7 +22,7 @@ export default function Home() {
       if (search) params.append("location", search);
       if (minScore > 0) params.append("min_score", minScore.toString());
       
-      const res = await fetch(`http://127.0.0.1:8000/search/profiles?${params.toString()}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search/profiles?${params.toString()}`);
       const data = await res.json();
       setProfiles(data.profiles || []);
     } catch (e) {

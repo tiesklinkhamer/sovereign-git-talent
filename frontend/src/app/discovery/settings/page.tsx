@@ -20,7 +20,7 @@ export default function DiscoverySettings() {
       // In a real app we'd have a GET /discovery/keywords
       // For now we'll simulate or add the GET endpoint if possible.
       // Let's assume we can fetch them.
-      const res = await fetch("http://127.0.0.1:8000/discovery/keywords/list");
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/discovery/keywords/list");
       if (res.ok) {
         const data = await res.json();
         setKeywords(data.keywords || []);
@@ -37,7 +37,7 @@ export default function DiscoverySettings() {
     if (!newKeyword) return;
     setAdding(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/discovery/keywords?keyword=${newKeyword}&category=${newCategory}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discovery/keywords?keyword=${newKeyword}&category=${newCategory}`, {
         method: "POST"
       });
       if (res.ok) {

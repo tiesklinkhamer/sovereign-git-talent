@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUser = async (t: string) => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/profile/me", {
+      const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/profile/me", {
         headers: { Authorization: `Bearer ${t}` },
       });
       if (res.ok) {
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async () => {
-    const res = await fetch("http://127.0.0.1:8000/auth/github/login");
+    const res = await fetch("${process.env.NEXT_PUBLIC_API_URL}/auth/github/login");
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
